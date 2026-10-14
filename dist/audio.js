@@ -24,10 +24,21 @@ export class AudioEngine {
     this.comp.ratio.value = 4; this.comp.attack.value = .004; this.comp.release.value = .18;
     this.master.connect(this.filter).connect(this.comp).connect(ctx.destination);
     this.duck = this.own(ctx.createGain()); this.duck.connect(this.master);
-    this.saturation = this.own(ctx.createWaveShaper()); this.saturation.oversample = '2x'; this.saturation.connect(this.duck);
+    this.saturation = this.own(ctx.createWaveShaper()); this.saturation.oversample = '2x';
+    const gritLowCut = this.own(ctx.createBiquadFilter()); gritLowCut.type = 'highpass'; gritLowCut.frequency.value = 90; gritLowCut.Q.value = .5;
+    this.saturation.connect(gritLowCut).connect(this.duck);
     this.bus = TRACKS.map((_, i) => {
       const g = this.own(ctx.createGain()); g.gain.value = project.mutes[i] ? 0 : project.volumes[i];
-      g.connect(i === 5 ? this.saturation : i === 7 ? this.duck : this.master); return g;
+      if (i === 5) {
+        // Preserve a clean sub region; distortion is limited to the upper branch.
+        const sub = this.own(ctx.createBiquadFilter()); sub.type = 'lowpass'; sub.frequency.value = 90; sub.Q.value = .5;
+        const upper = this.own(ctx.createBiquadFilter()); upper.type = 'highpass'; upper.frequency.value = 90; upper.Q.value = .5;
+        g.connect(sub).connect(this.duck); g.connect(upper).connect(this.saturation);
+      } else if (i >= 6) {
+        const highpass = this.own(ctx.createBiquadFilter()); highpass.type = 'highpass'; highpass.frequency.value = i === 7 ? 180 : 140; highpass.Q.value = .5;
+        g.connect(highpass).connect(i === 7 ? this.duck : this.master);
+      } else g.connect(this.master);
+      return g;
     });
     const { noise, room } = buffers(ctx); this.noise = noise;
     this.delay = this.own(ctx.createDelay(2)); this.delay.delayTime.value = 60 / project.bpm * .75;
@@ -37,7 +48,10 @@ export class AudioEngine {
     this.delay.connect(delayFilter).connect(this.feedback).connect(this.delay);
     this.delay.connect(this.delayWet).connect(this.master);
     this.reverb = this.own(ctx.createConvolver()); this.reverb.buffer = room;
-    this.reverbWet = this.own(ctx.createGain()); this.reverb.connect(this.reverbWet).connect(this.master);
+    this.reverbWet = this.own(ctx.createGain());
+    const roomLowCut = this.own(ctx.createBiquadFilter()); roomLowCut.type = 'highpass'; roomLowCut.frequency.value = 300;
+    const roomHighCut = this.own(ctx.createBiquadFilter()); roomHighCut.type = 'lowpass'; roomHighCut.frequency.value = Math.min(6000, ctx.sampleRate * .45);
+    this.reverb.connect(roomLowCut).connect(roomHighCut).connect(this.reverbWet).connect(this.master);
     this.bus[6].connect(this.delay); this.bus[6].connect(this.reverb); this.bus[7].connect(this.reverb);
     this.setMix(project.mix);
   }

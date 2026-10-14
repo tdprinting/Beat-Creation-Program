@@ -18,6 +18,8 @@ For development checks, run `npm ci` and `npm test`. Development dependencies pr
 
 - Eight synthesized voices: kick, snare, closed/open hats, percussion, tuned 808, plucked keys, atmospheric chords.
 - Five production palettes: melodic rap, atmospheric trap, boom bap, drill, and lo-fi. Seeded composition uses diatonic triads/sevenths, voice-led inversions, chord-tone motifs, a controlled sub-bass register, and coherent intro/verse/hook/outro variations.
+- Research-informed v3 generation adds repeating melodic contours, phrase-ending fills suited to each palette, independent 808 pickups/rests, and a clean-sub/upper-bass split. [Research and source notes](docs/production-research.md) explain the production guidance and implementation choices.
+- Producer controls: Vocal space reduces melody activity and leaves two-bar phrase-ending gaps; Fill amount controls hook fills; 808 phrasing offers balanced, bouncy, and sustained parts. These apply to new beats or unlocked layers during variation. Existing saved notes are preserved on load.
 - Idea cues for palette, mood, tempo, sparse arrangements, heavier drums, bells, and plucks. Disable keyword interpretation to use manual controls. Energy, complexity, and human-feel controls shape new compositions.
 - Lock individual layers and regenerate the rest while preserving tempo, key, progression, arrangement, and mix. New-beat generation replaces the entire composition; variation preserves locks.
 - Four-bar, 16-step-per-bar sequencer, velocity selection, track volume/mute, swing, live pads, keyboard shortcuts, and tap tempo.

@@ -21,9 +21,12 @@ test('studio generation, locking, note editing, clipboard, history and mix work 
     assert.equal(document.querySelectorAll('.step').length, 128);
     assert.equal(saved().locks.length, 8);
     $('interpret-idea').checked = false; $('style').value = 'drill'; $('mood').value = 'dark'; $('kit').value = 'heavy';
+    $('vocalSpace').value = '85'; $('fillRate').value = '0'; $('bass-style').value = 'bouncy';
     $('generate').click(); assert.equal(saved().style, 'drill'); assert.equal(saved().kit, 'heavy'); assert.ok(validateProject(saved()));
+    assert.equal(saved().vocalSpace, 85); assert.equal(saved().fillRate, 0); assert.equal(saved().bassStyle, 'bouncy');
     document.querySelector('[aria-label="Lock Keys during variation"]').click();
     const locked = saved().patterns.map(p => p[6]); $('variation').click(); assert.deepEqual(saved().patterns.map(p => p[6]), locked);
+    assert.equal(saved().vocalSpace, 85); assert.equal(saved().fillRate, 0); assert.equal(saved().bassStyle, 'bouncy');
     $('edit-mode').checked = true;
     document.querySelector('[aria-label="Keys, bar 1, step 1, on"]').click();
     assert.equal($('note-editor').open, true); $('note-pitch').value = '72'; $('note-length').value = '3'; $('note-velocity').value = '60'; $('note-apply').click();

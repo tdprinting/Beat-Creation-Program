@@ -14,13 +14,15 @@ test('all generated chords, bass and melody stay in the selected minor key', () 
   }
 });
 test('section variations preserve the musical identity of the verse', () => {
-  const p = generate({ seed: 42 });
+  const p = generate({ seed: 42, fillRate: 100 });
   for (let s = 0; s < 64; s++) {
     assert.deepEqual(p.patterns[1][0][s], p.patterns[2][0][s]);
     assert.equal(p.patterns[1][6][s]?.note, p.patterns[2][6][s]?.note);
-    assert.deepEqual(p.patterns[1][7][s], p.patterns[2][7][s]);
+    assert.deepEqual(p.patterns[1][7][s]?.chord, p.patterns[2][7][s]?.chord);
+    if (p.patterns[1][7][s]) assert.ok(p.patterns[2][7][s].vel >= p.patterns[1][7][s].vel);
   }
-  assert.ok(p.patterns[2][2].filter(Boolean).length > p.patterns[1][2].filter(Boolean).length);
+  const drumCount = pattern => pattern.slice(0, 5).flat().filter(Boolean).length;
+  assert.ok(drumCount(p.patterns[2]) > drumCount(p.patterns[1]));
 });
 test('variation preserves locked notes, mix, harmony, tempo, and arrangement without mutation', () => {
   const p = generate({ seed: 41 }); p.locks[5] = p.locks[6] = true; p.bpm = 107; p.mix.drive = 77;
